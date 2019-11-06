@@ -164,7 +164,7 @@ class ConfigReader {
       std::cerr << "ERROR: Call to epoll_create failed." << std::endl;
     }
 
-    epoll_event ready_to_read = {0};
+    epoll_event ready_to_read = {};
     ready_to_read.data.fd = fd;
     ready_to_read.events = EPOLLIN;
     if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ready_to_read)) {
