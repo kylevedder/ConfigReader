@@ -22,6 +22,8 @@
 #ifndef CONFIGREADER_MACROS_H_
 #define CONFIGREADER_MACROS_H_
 
+#include <atomic>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
