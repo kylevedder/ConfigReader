@@ -81,8 +81,7 @@ class LuaScript {
 
   // Generic get
   template <typename T>
-  T Get(__attribute__((unused)) 
-            const std::string& variable_name) {
+  T Get(__attribute__((unused)) const std::string& variable_name) {
     return 0;
   }
 

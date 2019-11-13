@@ -40,13 +40,12 @@ extern "C" {
 #include <vector>
 
 #include "config_reader/lua_script.h"
-#include "config_reader/types/type_interface.h"
+#include "config_reader/macros.h"
 #include "config_reader/types/config_generic.h"
 #include "config_reader/types/config_numeric.h"
-#include "config_reader/macros.h"
+#include "config_reader/types/type_interface.h"
 
 namespace config_reader {
-
 
 void LuaRead(const std::vector<std::string>& files) {
   // Create the LuaScript object

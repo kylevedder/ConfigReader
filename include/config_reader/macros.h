@@ -27,9 +27,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "config_reader/types/type_interface.h"
 #include "config_reader/types/config_generic.h"
 #include "config_reader/types/config_numeric.h"
+#include "config_reader/types/type_interface.h"
 
 namespace config_reader {
 #define MAKE_NAME(name) name
@@ -58,14 +58,12 @@ namespace config_reader {
                                ::config_reader::config_types::ConfigBool>(key)
 
 class MapSingleton {
-  // Needs large number of buckets because references are not stable across
-  // map growths.
   static constexpr int kNumMapBuckets = 1000000;
 
-public:
+ public:
   using KeyLookupMap =
-  std::unordered_map<std::string,
-  std::unique_ptr<config_types::TypeInterface>>;
+      std::unordered_map<std::string,
+                         std::unique_ptr<config_types::TypeInterface>>;
 
   static KeyLookupMap& Singleton() {
     static KeyLookupMap config(kNumMapBuckets);
@@ -80,12 +78,29 @@ public:
 
 template <typename CPPType, typename ConfigType>
 const CPPType& InitVar(const std::string& key) {
-  ConfigType* t = new ConfigType(key);
-  MapSingleton::Singleton()[key] =
-      std::unique_ptr<config_types::TypeInterface>(t);
+  auto& map = MapSingleton::Singleton();
+  auto find_res = map.find(key);
+  if (find_res != map.end()) {
+    config_types::TypeInterface* ti = find_res->second.get();
+    if (ti->GetType() != ConfigType::GetEnumType()) {
+      std::cerr << "Mismatch of types for key " << key
+                << ". Existing type: " << ti->GetType()
+                << ", requested type: " << ConfigType::GetEnumType()
+                << std::endl;
+      exit(0);
+    }
+    return static_cast<ConfigType*>(ti)->GetValue();
+  }
+  auto insert_res = map.insert(
+      {key, std::unique_ptr<config_types::TypeInterface>(new ConfigType(key))});
+  if (!insert_res.second) {
+    std::cerr << "Creation of " << key << " failed!" << std::endl;
+    exit(0);
+  }
   *MapSingleton::NewKeyAdded() = true;
-  return t->GetValue();
+  config_types::TypeInterface* ti = insert_res.first->second.get();
+  return static_cast<ConfigType*>(ti)->GetValue();
 }
-}
+}  // namespace config_reader
 
-#endif //CONFIGREADER_MACROS_H_
+#endif  // CONFIGREADER_MACROS_H_
